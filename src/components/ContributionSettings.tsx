@@ -46,10 +46,10 @@ function OptionCard({
   onClick: () => void;
   title: string;
   subtitle: string;
-  accentSelected: string; // border color when selected
-  accentHover: string; // hover border when not selected
+  accentSelected: string;
+  accentHover: string;
   rightDotColor?: string;
-  children?: React.ReactNode; // optional leading content (e.g., icon)
+  children?: React.ReactNode;
 }) {
   return (
     <button
@@ -174,8 +174,6 @@ function AmountControl({
   );
 }
 
-/* ---------- main component ---------- */
-
 export function ContributionSettings({
   contributionType,
   setContributionType,
@@ -188,7 +186,6 @@ export function ContributionSettings({
 }: ContributionSettingsProps) {
   return (
     <div className="space-y-8">
-      {/* Account Type */}
       <div className="space-y-4">
         <div>
           <h3 className="mb-1">Account Type</h3>
@@ -219,7 +216,6 @@ export function ContributionSettings({
         </div>
       </div>
 
-      {/* Contribution Method */}
       <div className="space-y-4">
         <div>
           <h3 className="mb-1">Contribution Method</h3>
@@ -269,7 +265,6 @@ export function ContributionSettings({
         </div>
       </div>
 
-      {/* Amount */}
       <div className="space-y-6">
         {contributionType === "dollar" ? (
           <AmountControl

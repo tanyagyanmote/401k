@@ -19,9 +19,9 @@ const moneyCompact = (n: number) =>
 
 function fvAnnuityDue(annual: number, years: number, r: number) {
   if (years <= 0 || annual <= 0) return 0;
-  if (r === 0) return annual * years; // no growth edge case
+  if (r === 0) return annual * years;
   const factor = ((1 + r) ** years - 1) / r;
-  return annual * factor * (1 + r); // payments at start of each year
+  return annual * factor * (1 + r);
 }
 
 export function RetirementProjection({

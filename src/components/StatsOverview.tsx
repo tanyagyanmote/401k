@@ -16,7 +16,7 @@ export function StatsOverview({
   percentAmount,
   annualSalary,
 }: StatsOverviewProps) {
-  const paychecksPerYear = 26; // Bi-weekly
+  const paychecksPerYear = 26;
   const currentContribution =
     contributionType === "dollar"
       ? dollarAmount
@@ -27,8 +27,7 @@ export function StatsOverview({
 
   return (
     <div className="grid gap-4">
-      {/* Main Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+=      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="p-6 rounded-xl border border-[#E8DDD0] bg-gradient-to-br from-[#FAF8F5] to-white dark:border-[#f59e0b]/30 dark:from-[#1a1f27] dark:to-[#13171d]">
           <div className="flex items-start justify-between mb-4">
             <div className="w-10 h-10 rounded-lg bg-[#D4C4B0] dark:bg-[#f59e0b] flex items-center justify-center">
@@ -68,7 +67,6 @@ export function StatsOverview({
         </div>
       </div>
 
-      {/* Projected Annual */}
       <div className="p-6 rounded-xl border border-[#D9A092] bg-gradient-to-br from-[#FAF6F4] to-white dark:border-[#3b82f6]/30 dark:from-[#1a1f27] dark:to-[#13171d]">
         <div className="flex items-start justify-between mb-4">
           <div className="w-10 h-10 rounded-lg bg-[#C17B63] dark:bg-[#3b82f6] flex items-center justify-center">
@@ -98,7 +96,6 @@ export function StatsOverview({
         </div>
       </div>
 
-      {/* Annual Limit Indicator */}
       <div className="p-5 rounded-xl bg-gradient-to-br from-[#FBF7F7] to-[#FAF8F5] border border-[#E5C1C3] dark:from-[#1a1f27] dark:to-[#13171d] dark:border-[#64748b]/30">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">

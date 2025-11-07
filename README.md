@@ -8,7 +8,7 @@ A tiny, local-only app that helps you pick a 401(k) contribution method (fixed d
 
 ---
 
-## ✨ Features
+## Features
 
 - **Contribution Type:** Choose **Fixed Amount ($)** or **Percent of Paycheck (%)**
 - **Adjust Rate:** Use a slider or type a value (both stay in sync)
@@ -18,7 +18,7 @@ A tiny, local-only app that helps you pick a 401(k) contribution method (fixed d
 
 ---
 
-## 🧰 Tech Stack
+## Tech Stack
 
 - **Frontend:** React + TypeScript
 - **Styling:** Tailwind CSS
@@ -28,7 +28,7 @@ No backend. All data is mocked on the client so it runs instantly.
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 **Prereqs:** Node 18+ and npm (or yarn/pnpm)
 

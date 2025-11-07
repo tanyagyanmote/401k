@@ -276,7 +276,7 @@ export function ContributionSettings({
             sliderStep={10}
             label="Contribution Amount"
             hint="How much would you like to contribute per paycheck?"
-            prefix="$"
+            suffix="$"
             accentBorder="#8B9E8A"
             accentShadow="#8B9E8A"
           />

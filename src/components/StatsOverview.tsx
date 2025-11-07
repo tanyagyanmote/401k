@@ -1,13 +1,18 @@
 import { TrendingUp, Calendar, Wallet } from "lucide-react";
-import React from "react";
+import React, { useMemo } from "react";
 
 interface StatsOverviewProps {
-  ytdContributions: number;
+  ytdContributions: number | string;
   contributionType: "dollar" | "percent";
-  dollarAmount: number;
-  percentAmount: number;
-  annualSalary: number;
+  dollarAmount: number | string;
+  percentAmount: number | string;
+  annualSalary: number | string;
+  paychecksPerYear?: number; // optional override (default 26)
 }
+
+/** robust: handles "", "$650", "1,234.56", numbers */
+const toNumber = (v: unknown) =>
+  typeof v === "number" ? v : Number(String(v ?? "").replace(/[^\d.-]/g, "")) || 0;
 
 export function StatsOverview({
   ytdContributions,
@@ -15,19 +20,35 @@ export function StatsOverview({
   dollarAmount,
   percentAmount,
   annualSalary,
+  paychecksPerYear = 26,
 }: StatsOverviewProps) {
-  const paychecksPerYear = 26;
-  const currentContribution =
-    contributionType === "dollar"
-      ? dollarAmount
-      : (annualSalary / paychecksPerYear) * (percentAmount / 100);
+  // Parse/normalize everything to numbers
+  const ytd = toNumber(ytdContributions);
+  const salary = toNumber(annualSalary);
+  const dollars = toNumber(dollarAmount);
+  const percent = toNumber(percentAmount);
 
-  const projectedAnnual = currentContribution * paychecksPerYear;
-  const remainingYear = projectedAnnual - ytdContributions;
+  // Compute values (memoized for clarity; not required)
+  const { currentContribution, projectedAnnual, remainingYear } = useMemo(() => {
+    const perPay =
+      contributionType === "dollar"
+        ? dollars
+        : (salary / paychecksPerYear) * (percent / 100);
+
+    const projected = perPay * paychecksPerYear;
+    const remaining = Math.max(0, projected - ytd);
+
+    return {
+      currentContribution: perPay,
+      projectedAnnual: projected,
+      remainingYear: remaining,
+    };
+  }, [contributionType, dollars, percent, salary, paychecksPerYear, ytd]);
 
   return (
     <div className="grid gap-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* YTD */}
         <div className="p-6 rounded-xl border border-[#E8DDD0] bg-gradient-to-br from-[#FAF8F5] to-white dark:border-[#f59e0b]/30 dark:from-[#1a1f27] dark:to-[#13171d]">
           <div className="flex items-start justify-between mb-4">
             <div className="w-10 h-10 rounded-lg bg-[#D4C4B0] dark:bg-[#f59e0b] flex items-center justify-center">
@@ -37,7 +58,11 @@ export function StatsOverview({
           </div>
           <div className="space-y-1">
             <div className="text-[28px] tabular-nums tracking-tight text-[#5C4A39] dark:text-[#fbbf24]">
-              ${ytdContributions.toLocaleString()}
+              $
+              {ytd.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
             </div>
             <div className="text-[14px] text-[#8B7355] dark:text-[#d97706]">
               Total contributions this year
@@ -45,28 +70,32 @@ export function StatsOverview({
           </div>
         </div>
 
+        {/* Per paycheck */}
         <div className="p-6 rounded-xl border border-[#B8C5B7] bg-gradient-to-br from-[#F7F9F7] to-white dark:border-[#14b8a6]/30 dark:from-[#1a1f27] dark:to-[#13171d]">
           <div className="flex items-start justify-between mb-4">
             <div className="w-10 h-10 rounded-lg bg-[#8B9E8A] dark:bg-[#14b8a6] flex items-center justify-center">
               <Wallet className="w-5 h-5 text-white" />
             </div>
-            <span className="text-[13px] text-[#6B7C6A] dark:text-[#14b8a6]">
-              Per Paycheck
-            </span>
+            <span className="text-[13px] text-[#6B7C6A] dark:text-[#14b8a6]">Per Paycheck</span>
           </div>
           <div className="space-y-1">
             <div className="text-[28px] tabular-nums tracking-tight text-[#4A5A49] dark:text-[#2dd4bf]">
-              ${currentContribution.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              $
+              {currentContribution.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
             </div>
             <div className="text-[14px] text-[#6B7C6A] dark:text-[#0d9488]">
               {contributionType === "percent"
-                ? `${percentAmount}% of paycheck`
+                ? `${percent}% of paycheck`
                 : "Fixed amount"}
             </div>
           </div>
         </div>
       </div>
 
+      {/* Projected */}
       <div className="p-6 rounded-xl border border-[#D9A092] bg-gradient-to-br from-[#FAF6F4] to-white dark:border-[#3b82f6]/30 dark:from-[#1a1f27] dark:to-[#13171d]">
         <div className="flex items-start justify-between mb-4">
           <div className="w-10 h-10 rounded-lg bg-[#C17B63] dark:bg-[#3b82f6] flex items-center justify-center">
@@ -77,25 +106,30 @@ export function StatsOverview({
         <div className="space-y-3">
           <div>
             <div className="text-[28px] tabular-nums tracking-tight text-[#8B5A4A] dark:text-[#60a5fa]">
-              ${projectedAnnual.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              $
+              {projectedAnnual.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
             </div>
-            <div className="text-[14px] text-[#A86A54] dark:text-[#3b82f6]">
-              Total for 2025
-            </div>
+            <div className="text-[14px] text-[#A86A54] dark:text-[#3b82f6]">Total for 2025</div>
           </div>
           <div className="pt-3 border-t border-[#E8D5CC] dark:border-[#3b82f6]/20">
             <div className="flex items-baseline gap-2">
-              <span className="text-[14px] text-[#A86A54] dark:text-[#3b82f6]">
-                Remaining this year:
-              </span>
+              <span className="text-[14px] text-[#A86A54] dark:text-[#3b82f6]">Remaining this year:</span>
               <span className="text-[15px] tabular-nums text-[#8B5A4A] dark:text-[#60a5fa]">
-                ${Math.max(0, remainingYear).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                $
+                {remainingYear.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
               </span>
             </div>
           </div>
         </div>
       </div>
 
+      {/* Annual limit bar */}
       <div className="p-5 rounded-xl bg-gradient-to-br from-[#FBF7F7] to-[#FAF8F5] border border-[#E5C1C3] dark:from-[#1a1f27] dark:to-[#13171d] dark:border-[#64748b]/30">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
@@ -112,9 +146,7 @@ export function StatsOverview({
               <span className="text-[13px] text-[#A27F82] dark:text-[#64748b]">
                 ${projectedAnnual.toLocaleString(undefined, { maximumFractionDigits: 0 })}
               </span>
-              <span className="text-[13px] text-[#A27F82] dark:text-[#64748b]">
-                $23,500 limit
-              </span>
+              <span className="text-[13px] text-[#A27F82] dark:text-[#64748b]">$23,500 limit</span>
             </div>
           </div>
         </div>

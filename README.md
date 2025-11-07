@@ -1,4 +1,4 @@
-# 401(k) Contribution Playground
+# 401(k) Contribution
 
 A tiny, local-only app that helps you pick a 401(k) contribution method (fixed dollar vs. percent), adjust the rate with a slider/text input, and instantly see:
 - Per-paycheck contribution

@@ -27,7 +27,7 @@ export function StatsOverview({
 
   return (
     <div className="grid gap-4">
-=      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="p-6 rounded-xl border border-[#E8DDD0] bg-gradient-to-br from-[#FAF8F5] to-white dark:border-[#f59e0b]/30 dark:from-[#1a1f27] dark:to-[#13171d]">
           <div className="flex items-start justify-between mb-4">
             <div className="w-10 h-10 rounded-lg bg-[#D4C4B0] dark:bg-[#f59e0b] flex items-center justify-center">

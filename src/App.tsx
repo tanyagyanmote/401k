@@ -53,7 +53,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-background grid-background">
-      {/* Header */}
       <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-6 py-5">
           <div className="flex items-center justify-between">
@@ -95,7 +94,6 @@ export default function App() {
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8">
-          {/* Left Column - Settings */}
           <div className="space-y-6">
             <div className="p-8 rounded-2xl border border-border bg-card">
               <ContributionSettings
@@ -110,7 +108,6 @@ export default function App() {
               />
             </div>
 
-            {/* Save Button */}
             <button
               onClick={handleSave}
               className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-[#8B7355] to-[#A68B76] dark:from-[#3b82f6] dark:to-[#14b8a6] text-white hover:from-[#7A6349] hover:to-[#947B68] dark:hover:from-[#2563eb] dark:hover:to-[#0d9488] transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-[#8B7355]/20 dark:shadow-[#3b82f6]/30 hover:shadow-xl hover:shadow-[#8B7355]/30 dark:hover:shadow-[#3b82f6]/40 active:scale-[0.99]"
@@ -119,7 +116,6 @@ export default function App() {
               <span>Save Changes</span>
             </button>
 
-            {/* Save Notification */}
             {showSaveNotification && (
               <div className="p-4 rounded-xl bg-gradient-to-r from-[#8B9E8A] to-[#A8B5A7] dark:from-[#047857] dark:to-[#14b8a6] text-white shadow-lg shadow-[#8B9E8A]/20 dark:shadow-[#047857]/30 animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <div className="flex items-center gap-2">
@@ -132,7 +128,6 @@ export default function App() {
             )}
           </div>
 
-          {/* Right Column - Stats & Projections */}
           <div className="space-y-6">
             <StatsOverview
               ytdContributions={ytdContributions}

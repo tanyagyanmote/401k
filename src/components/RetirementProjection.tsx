@@ -1,4 +1,5 @@
 import { Sparkles } from "lucide-react";
+import React from "react";
 
 interface RetirementProjectionProps {
   currentAge: number;

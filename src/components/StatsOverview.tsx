@@ -1,4 +1,5 @@
 import { TrendingUp, Calendar, Wallet } from "lucide-react";
+import React from "react";
 
 interface StatsOverviewProps {
   ytdContributions: number;

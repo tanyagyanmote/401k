@@ -3,6 +3,7 @@ import { ContributionSettings } from "./components/ContributionSettings";
 import { StatsOverview } from "./components/StatsOverview";
 import { RetirementProjection } from "./components/RetirementProjection";
 import { Save, User, Moon, Sun } from "lucide-react";
+import React from "react";
 
 export default function App() {
   // Mock user data
@@ -76,7 +77,7 @@ export default function App() {
               </button>
               <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary hover:bg-muted transition-all border border-border">
                 <User className="w-4 h-4" />
-                <span className="text-[14px]">Sarah Chen</span>
+                <span className="text-[14px]">John Doe</span>
               </button>
             </div>
           </div>

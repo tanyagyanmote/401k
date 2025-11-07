@@ -1,16 +1,180 @@
-import { useState } from "react";
 import { DollarSign, Percent } from "lucide-react";
+import React from "react";
+
+type ContributionKind = "dollar" | "percent";
+type AccountKind = "traditional" | "roth";
 
 interface ContributionSettingsProps {
-  contributionType: "dollar" | "percent";
-  setContributionType: (type: "dollar" | "percent") => void;
+  contributionType: ContributionKind;
+  setContributionType: (type: ContributionKind) => void;
   dollarAmount: number;
   setDollarAmount: (amount: number) => void;
   percentAmount: number;
   setPercentAmount: (percent: number) => void;
-  accountType: "traditional" | "roth";
-  setAccountType: (type: "traditional" | "roth") => void;
+  accountType: AccountKind;
+  setAccountType: (type: AccountKind) => void;
 }
+
+/* ---------- helpers ---------- */
+
+const clamp = (v: number, min: number, max: number) =>
+  Math.min(max, Math.max(min, v));
+
+const cardBase =
+  "relative p-5 rounded-xl border-2 transition-all duration-200 bg-card";
+const cardSelected = "bg-[#F7F8FA] dark:bg-[#1a1f27]";
+const iconBoxBase =
+  "w-10 h-10 rounded-lg flex items-center justify-center transition-colors duration-200";
+const inputShellBase =
+  "relative w-full rounded-xl border-2 bg-card transition-all duration-200 focus-within:scale-[1.01]";
+const inputBase =
+  "w-full px-6 py-5 rounded-xl bg-transparent text-[32px] tabular-nums outline-none";
+
+/* ---------- tiny building blocks ---------- */
+
+function OptionCard({
+  selected,
+  onClick,
+  title,
+  subtitle,
+  accentSelected,
+  accentHover,
+  rightDotColor,
+  children,
+}: {
+  selected: boolean;
+  onClick: () => void;
+  title: string;
+  subtitle: string;
+  accentSelected: string; // border color when selected
+  accentHover: string; // hover border when not selected
+  rightDotColor?: string;
+  children?: React.ReactNode; // optional leading content (e.g., icon)
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`${cardBase} ${
+        selected
+          ? `${cardSelected} border-[${accentSelected}]`
+          : `border-border hover:border-[${accentHover}]`
+      } flex items-center gap-3`}
+    >
+      {children}
+      <div className="text-left">
+        <div className="text-[15px] font-medium">{title}</div>
+        <div className="text-[13px] text-muted-foreground leading-relaxed">
+          {subtitle}
+        </div>
+      </div>
+      {selected && rightDotColor && (
+        <div
+          className="absolute top-4 right-4 w-2 h-2 rounded-full"
+          style={{ backgroundColor: rightDotColor }}
+        />
+      )}
+    </button>
+  );
+}
+
+function AmountControl({
+  value,
+  setValue,
+  min,
+  max,
+  step,
+  label,
+  hint,
+  prefix,
+  suffix,
+  accentBorder,
+  accentShadow,
+  sliderStep,
+}: {
+  value: number;
+  setValue: (n: number) => void;
+  min: number;
+  max: number;
+  step?: number;
+  sliderStep?: number;
+  label: string;
+  hint: string;
+  prefix?: string;
+  suffix?: string;
+  accentBorder: string; // e.g. "#8B9E8A"
+  accentShadow: string; // e.g. "#8B9E8A"
+}) {
+  return (
+    <div className="space-y-4">
+      <div>
+        <h3 className="mb-1">{label}</h3>
+        <p className="text-[15px] text-muted-foreground">{hint}</p>
+      </div>
+
+      <div
+        className={`${inputShellBase}`}
+        style={{
+          boxShadow: "none",
+        }}
+      >
+        <input
+          type="number"
+          value={value}
+          min={min}
+          max={max}
+          step={step ?? 1}
+          onChange={(e) => setValue(clamp(Number(e.target.value || 0), min, max))}
+          className={`${inputBase}`}
+          style={{
+            borderColor: "var(--border)",
+          }}
+        />
+        {prefix ? (
+          <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[32px] text-muted-foreground pointer-events-none">
+            {prefix}
+          </div>
+        ) : null}
+        {suffix ? (
+          <div className="absolute right-6 top-1/2 -translate-y-1/2 text-[32px] text-muted-foreground pointer-events-none">
+            {suffix}
+          </div>
+        ) : null}
+        <style>{`
+          .focus-within\\:shadow-accent:focus-within {
+            box-shadow: 0 10px 24px 0 ${accentShadow}1A;
+            border-color: ${accentBorder};
+          }
+        `}</style>
+      </div>
+
+      <div className="px-2">
+        <input
+          type="range"
+          min={min}
+          max={max}
+          step={sliderStep ?? step ?? 1}
+          value={value}
+          onChange={(e) => setValue(Number(e.target.value))}
+          className="w-full"
+        />
+        <div className="flex justify-between mt-3 text-[13px] text-muted-foreground">
+          <span>
+            {prefix}
+            {min}
+            {suffix}
+          </span>
+          <span>
+            {prefix}
+            {max}
+            {suffix}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- main component ---------- */
 
 export function ContributionSettings({
   contributionType,
@@ -22,11 +186,9 @@ export function ContributionSettings({
   accountType,
   setAccountType,
 }: ContributionSettingsProps) {
-  const [focusedInput, setFocusedInput] = useState<string | null>(null);
-
   return (
     <div className="space-y-8">
-      {/* Account Type Selection */}
+      {/* Account Type */}
       <div className="space-y-4">
         <div>
           <h3 className="mb-1">Account Type</h3>
@@ -34,53 +196,30 @@ export function ContributionSettings({
             Choose how your contributions are taxed
           </p>
         </div>
+
         <div className="grid grid-cols-2 gap-3">
-          <button
+          <OptionCard
+            selected={accountType === "traditional"}
             onClick={() => setAccountType("traditional")}
-            className={`
-              relative p-5 rounded-xl border-2 transition-all duration-200
-              ${
-                accountType === "traditional"
-                  ? "border-[#8E9AAF] bg-[#F7F8FA] dark:border-[#3b82f6] dark:bg-[#1a1f27]"
-                  : "border-border bg-card hover:border-[#B8C2D4] dark:hover:border-[#3b82f6]/50"
-              }
-            `}
-          >
-            <div className="flex flex-col items-start gap-2">
-              <div className="text-[15px] font-medium">Traditional</div>
-              <div className="text-[13px] text-muted-foreground text-left leading-relaxed">
-                Pre-tax contributions, taxed at withdrawal
-              </div>
-            </div>
-            {accountType === "traditional" && (
-              <div className="absolute top-4 right-4 w-2 h-2 rounded-full bg-[#8E9AAF] dark:bg-[#3b82f6]" />
-            )}
-          </button>
-          <button
+            title="Traditional"
+            subtitle="Pre-tax contributions, taxed at withdrawal"
+            accentSelected="#8E9AAF"
+            accentHover="#B8C2D4"
+            rightDotColor="#8E9AAF"
+          />
+          <OptionCard
+            selected={accountType === "roth"}
             onClick={() => setAccountType("roth")}
-            className={`
-              relative p-5 rounded-xl border-2 transition-all duration-200
-              ${
-                accountType === "roth"
-                  ? "border-[#C9989B] bg-[#FBF7F7] dark:border-[#14b8a6] dark:bg-[#1a1f27]"
-                  : "border-border bg-card hover:border-[#E5C1C3] dark:hover:border-[#14b8a6]/50"
-              }
-            `}
-          >
-            <div className="flex flex-col items-start gap-2">
-              <div className="text-[15px] font-medium">Roth</div>
-              <div className="text-[13px] text-muted-foreground text-left leading-relaxed">
-                After-tax contributions, tax-free withdrawals
-              </div>
-            </div>
-            {accountType === "roth" && (
-              <div className="absolute top-4 right-4 w-2 h-2 rounded-full bg-[#C9989B] dark:bg-[#14b8a6]" />
-            )}
-          </button>
+            title="Roth"
+            subtitle="After-tax contributions, tax-free withdrawals"
+            accentSelected="#C9989B"
+            accentHover="#E5C1C3"
+            rightDotColor="#C9989B"
+          />
         </div>
       </div>
 
-      {/* Contribution Type Selection */}
+      {/* Contribution Method */}
       <div className="space-y-4">
         <div>
           <h3 className="mb-1">Contribution Method</h3>
@@ -88,191 +227,78 @@ export function ContributionSettings({
             Set a fixed amount or percentage of your paycheck
           </p>
         </div>
+
         <div className="grid grid-cols-2 gap-3">
-          <button
+          <OptionCard
+            selected={contributionType === "dollar"}
             onClick={() => setContributionType("dollar")}
-            className={`
-              relative p-5 rounded-xl border-2 transition-all duration-200 flex items-center gap-3
-              ${
-                contributionType === "dollar"
-                  ? "border-[#8B9E8A] bg-[#F7F9F7] dark:border-[#14b8a6] dark:bg-[#1a1f27]"
-                  : "border-border bg-card hover:border-[#B8C5B7] dark:hover:border-[#14b8a6]/50"
-              }
-            `}
+            title="Fixed Amount"
+            subtitle="Per paycheck"
+            accentSelected="#8B9E8A"
+            accentHover="#B8C5B7"
           >
             <div
-              className={`
-              w-10 h-10 rounded-lg flex items-center justify-center transition-colors duration-200
-              ${
+              className={`${iconBoxBase} ${
                 contributionType === "dollar"
-                  ? "bg-[#8B9E8A] text-white dark:bg-[#14b8a6]"
+                  ? "bg-[#8B9E8A] text-white"
                   : "bg-secondary text-foreground"
-              }
-            `}
+              }`}
             >
               <DollarSign className="w-5 h-5" />
             </div>
-            <div className="text-left">
-              <div className="text-[15px] font-medium">Fixed Amount</div>
-              <div className="text-[13px] text-muted-foreground">
-                Per paycheck
-              </div>
-            </div>
-          </button>
-          <button
+          </OptionCard>
+
+          <OptionCard
+            selected={contributionType === "percent"}
             onClick={() => setContributionType("percent")}
-            className={`
-              relative p-5 rounded-xl border-2 transition-all duration-200 flex items-center gap-3
-              ${
-                contributionType === "percent"
-                  ? "border-[#C17B63] bg-[#FAF6F4] dark:border-[#3b82f6] dark:bg-[#1a1f27]"
-                  : "border-border bg-card hover:border-[#D9A092] dark:hover:border-[#3b82f6]/50"
-              }
-            `}
+            title="Percentage"
+            subtitle="Of salary"
+            accentSelected="#C17B63"
+            accentHover="#D9A092"
           >
             <div
-              className={`
-              w-10 h-10 rounded-lg flex items-center justify-center transition-colors duration-200
-              ${
+              className={`${iconBoxBase} ${
                 contributionType === "percent"
-                  ? "bg-[#C17B63] text-white dark:bg-[#3b82f6]"
+                  ? "bg-[#C17B63] text-white"
                   : "bg-secondary text-foreground"
-              }
-            `}
+              }`}
             >
               <Percent className="w-5 h-5" />
             </div>
-            <div className="text-left">
-              <div className="text-[15px] font-medium">Percentage</div>
-              <div className="text-[13px] text-muted-foreground">Of salary</div>
-            </div>
-          </button>
+          </OptionCard>
         </div>
       </div>
 
-      {/* Amount Adjustment */}
+      {/* Amount */}
       <div className="space-y-6">
         {contributionType === "dollar" ? (
-          <div className="space-y-4">
-            <div>
-              <h3 className="mb-1">Contribution Amount</h3>
-              <p className="text-[15px] text-muted-foreground">
-                How much would you like to contribute per paycheck?
-              </p>
-            </div>
-            <div className="space-y-5">
-              <div
-                className={`
-                relative transition-all duration-200
-                ${focusedInput === "dollar" ? "scale-[1.01]" : ""}
-              `}
-              >
-                <input
-                  type="number"
-                  value={dollarAmount}
-                  onChange={(e) =>
-                    setDollarAmount(Math.max(0, Number(e.target.value)))
-                  }
-                  onFocus={() => setFocusedInput("dollar")}
-                  onBlur={() => setFocusedInput(null)}
-                  className={`
-                    w-full px-6 py-5 rounded-xl border-2 bg-card
-                    transition-all duration-200 text-[32px] tabular-nums
-                    ${
-                      focusedInput === "dollar"
-                        ? "border-[#8B9E8A] shadow-lg shadow-[#8B9E8A]/10 dark:border-[#14b8a6] dark:shadow-[#14b8a6]/20"
-                        : "border-border"
-                    }
-                  `}
-                  placeholder="$0"
-                  min="0"
-                  max="1000"
-                />
-                <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[32px] text-muted-foreground pointer-events-none">
-                  $
-                </div>
-              </div>
-              <div className="px-2">
-                <input
-                  type="range"
-                  min="0"
-                  max="1000"
-                  step="10"
-                  value={dollarAmount}
-                  onChange={(e) => setDollarAmount(Number(e.target.value))}
-                  className="w-full"
-                />
-                <div className="flex justify-between mt-3">
-                  <span className="text-[13px] text-muted-foreground">$0</span>
-                  <span className="text-[13px] text-muted-foreground">
-                    $1,000
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+          <AmountControl
+            value={dollarAmount}
+            setValue={(v) => setDollarAmount(clamp(v, 0, 1000))}
+            min={0}
+            max={1000}
+            step={10}
+            sliderStep={10}
+            label="Contribution Amount"
+            hint="How much would you like to contribute per paycheck?"
+            prefix="$"
+            accentBorder="#8B9E8A"
+            accentShadow="#8B9E8A"
+          />
         ) : (
-          <div className="space-y-4">
-            <div>
-              <h3 className="mb-1">Contribution Percentage</h3>
-              <p className="text-[15px] text-muted-foreground">
-                What percentage of your salary would you like to contribute?
-              </p>
-            </div>
-            <div className="space-y-5">
-              <div
-                className={`
-                relative transition-all duration-200
-                ${focusedInput === "percent" ? "scale-[1.01]" : ""}
-              `}
-              >
-                <input
-                  type="number"
-                  value={percentAmount}
-                  onChange={(e) =>
-                    setPercentAmount(
-                      Math.min(100, Math.max(0, Number(e.target.value)))
-                    )
-                  }
-                  onFocus={() => setFocusedInput("percent")}
-                  onBlur={() => setFocusedInput(null)}
-                  className={`
-                    w-full px-6 py-5 rounded-xl border-2 bg-card
-                    transition-all duration-200 text-[32px] tabular-nums
-                    ${
-                      focusedInput === "percent"
-                        ? "border-[#C17B63] shadow-lg shadow-[#C17B63]/10 dark:border-[#3b82f6] dark:shadow-[#3b82f6]/20"
-                        : "border-border"
-                    }
-                  `}
-                  placeholder="0"
-                  min="0"
-                  max="100"
-                  step="0.5"
-                />
-                <div className="absolute right-6 top-1/2 -translate-y-1/2 text-[32px] text-muted-foreground pointer-events-none">
-                  %
-                </div>
-              </div>
-              <div className="px-2">
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  step="0.5"
-                  value={percentAmount}
-                  onChange={(e) => setPercentAmount(Number(e.target.value))}
-                  className="w-full"
-                />
-                <div className="flex justify-between mt-3">
-                  <span className="text-[13px] text-muted-foreground">0%</span>
-                  <span className="text-[13px] text-muted-foreground">
-                    100%
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+          <AmountControl
+            value={percentAmount}
+            setValue={(v) => setPercentAmount(clamp(v, 0, 100))}
+            min={0}
+            max={100}
+            step={0.5}
+            sliderStep={0.5}
+            label="Contribution Percentage"
+            hint="What percentage of your salary would you like to contribute?"
+            suffix="%"
+            accentBorder="#C17B63"
+            accentShadow="#C17B63"
+          />
         )}
       </div>
     </div>

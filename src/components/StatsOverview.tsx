@@ -129,7 +129,6 @@ export function StatsOverview({
         </div>
       </div>
 
-      {/* Annual limit bar */}
       <div className="p-5 rounded-xl bg-gradient-to-br from-[#FBF7F7] to-[#FAF8F5] border border-[#E5C1C3] dark:from-[#1a1f27] dark:to-[#13171d] dark:border-[#64748b]/30">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
